@@ -6,6 +6,11 @@ extern crate gtk;
 extern crate pango;
 extern crate pangocairo;
 
+mod app;
+mod static_resources;
+mod uibuilder;
+mod window_state;
+
 use chrono::prelude::*;
 use gio::prelude::*;
 use gtk::prelude::*;
@@ -161,7 +166,7 @@ fn print(window: &gtk::ApplicationWindow, data: Data) {
 }
 
 fn build_ui(application: &gtk::Application) {
-    let glade_src = include_str!("../data/ui/design.glade");
+    let glade_src = include_str!("../data/ui/design.ui");
     let builder = Builder::new_from_string(glade_src);
 
     let window: ApplicationWindow = builder
