@@ -14,7 +14,8 @@ mod window_state;
 use chrono::prelude::*;
 use gio::prelude::*;
 use gtk::prelude::*;
-use gtk::{AboutDialog, ApplicationWindow, Builder, Button, Entry, Window};
+use gtk::{AboutDialog, ApplicationWindow, Builder, Button, Entry, SettingsExt, Window};
+use window_state::*;
 
 use std::env::args;
 
@@ -174,6 +175,15 @@ fn build_ui(application: &gtk::Application) {
         .expect("Couldn't get window");
     window.set_application(Some(application));
 
+    let settings: gio::Settings = gio::Settings::new("org.mezeipetister.labelprinting");
+    let window_state = WindowState::load_from_gsettings(&settings);
+    window.set_default_size(window_state.width, window_state.height);
+    if window_state.is_maximized {
+        window.maximize();
+    } else if window_state.x > 0 && window_state.y > 0 {
+        window.move_(window_state.x, window_state.y);
+    }
+
     let button_about: Button = builder
         .get_object("info")
         .expect("Couldn't get info button");
@@ -231,11 +241,21 @@ fn build_ui(application: &gtk::Application) {
     });
 
     window.show_all();
+
+    window.connect_delete_event(move |window, _| {
+        // let app = upgrade_weak!(app_weak, Inhibit(false));
+        let settings: gio::Settings = gio::Settings::new("org.mezeipetister.labelprinting");
+        let window_state = WindowState::from_window(window);
+        window_state.save_in_gsettings(&settings);
+        // app.op.lock().unwrap().quit();
+        Inhibit(false)
+    });
 }
 
 fn main() {
-    let application = gtk::Application::new(Some("com.labelprinting"), Default::default())
-        .expect("Initialization failed...");
+    let application =
+        gtk::Application::new(Some("org.mezeipetister.labelprinting"), Default::default())
+            .expect("Initialization failed...");
 
     application.connect_activate(|app| {
         build_ui(app);

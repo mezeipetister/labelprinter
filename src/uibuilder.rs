@@ -12,7 +12,7 @@ impl UI {
         let builder = gtk::Builder::new();
 
         builder
-            .add_from_resource("org/mezeipetister/LabelPrinter/design.ui")
+            .add_from_resource("org/mezeipetister/labelprinting/design.ui")
             .expect("Can't load ui file: design.ui");
 
         UI { builder }
